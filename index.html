@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive New Year – Pranav</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: white;
+    font-family: "Poppins", sans-serif;
+    overflow: hidden;
+    text-align: center;
+}
+#screen1,#screen2,#screen3,#screen4,#giftScreen,#finalScreen{
+    display:none;
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:90%;
+}
+input{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    width:50%;
+    font-size:16px;
+    display:block;
+    margin:0 auto 10px auto;
+}
+.btn{
+    display:block;
+    margin:0 auto 15px auto;
+    padding:10px 20px;
+    font-size:16px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    background:gold;
+    color:black;
+    font-weight:600;
+}
+.goldText{
+    font-size:50px;
+    font-weight:700;
+}
+.teddy{width:220px;animation:pop 1s ease-out forwards;}
+@keyframes pop{0%{transform:scale(0);}100%{transform:scale(1);}}
+canvas{position:fixed;top:0;left:0;}
+.backBtn{
+    position:fixed;
+    left:20px;
+    bottom:20px;
+    padding:10px 20px;
+    font-size:16px;
+    background:gold;
+    color:black;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    z-index:9999;
+    display:none;
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="fireworksCanvas"></canvas>
+<div id="screen1"><h1 id="introText"></h1></div>
+
+<div id="screen2">
+<h2>What is on 31st December? 🎉</h2>
+<input id="answer" placeholder="Type your answer...">
+<button class="btn" onclick="checkAnswer()">Submit</button>
+<p id="hint" style="color:yellow;"></p>
+</div>
+
+<div id="screen3">
+<h2>Enter Your Name ✨</h2>
+<input id="username" placeholder="Your name...">
+<button class="btn" onclick="startCelebration()">Continue</button>
+</div>
+
+<div id="screen4">
+<h1>🎉 Happy New Year 2026 🎉</h1>
+<h2 id="yourName"></h2>
+<h3 id="typing"></h3>
+<button class="btn" id="seeGiftBtn" onclick="showGift()" style="display:none;">See Your Gift 🎁</button>
+</div>
+
+<div id="giftScreen">
+<h2>What will you say to me for these beautiful wishes? 😊</h2>
+<input id="thanksInput" placeholder="Type your response...">
+<button class="btn" onclick="showTeddy()">Submit</button>
+</div>
+
+<div id="finalScreen">
+<img src="t1.jpg" class="teddy">
+<h2>🎁 Your Special New Year Gift 🎁</h2>
+<h3 style="color:gold;">May your 2026 be filled with happiness, success & love ❤️</h3>
+<h3 style="margin-top:20px;color:#f10707;">With love and best wishes,<br>Engg. Pranav Kadam</h3>
+</div>
+
+<button class="backBtn" id="backBtn" onclick="goBack()">⬅ Go Back</button>
+
+<script>
+// ---------------- TYPEWRITER INTRO ----------------
+let introWords = ["Click","anywhere","on","the","page","to","start..."];
+let introIndex=0;
+let hasClicked=false;
+window.onload=()=>{
+    showScreen("screen1");
+    typeWriterIntro();
+};
+function typeWriterIntro(){
+    if(introIndex<introWords.length){
+        document.getElementById("introText").innerHTML+=introWords[introIndex]+" ";
+        introIndex++;
+        setTimeout(typeWriterIntro,450);
+    }
+}
+document.body.addEventListener("click",function(){
+    if(!hasClicked && introIndex>=introWords.length){
+        hasClicked=true;
+        showScreen("screen2");
+    }
+});
+
+// ---------------- SCREEN FLOW ----------------
+let screenStack=[];
+function showScreen(id){
+    hideAllScreens();
+    document.getElementById(id).style.display="block";
+    if(id!=="screen1") document.getElementById("backBtn").style.display="block";
+    else document.getElementById("backBtn").style.display="none";
+    screenStack.push(id);
+}
+function goBack(){
+    screenStack.pop(); // remove current
+    let prev=screenStack.pop();
+    if(prev) showScreen(prev);
+    else showScreen("screen1");
+}
+function hideAllScreens(){
+    ["screen1","screen2","screen3","screen4","giftScreen","finalScreen"].forEach(id=>document.getElementById(id).style.display="none");
+}
+
+// ---------------- QUESTION ----------------
+function checkAnswer(){
+    let ans=document.getElementById("answer").value.toLowerCase();
+    if(ans.includes("happy")||ans.includes("new")||ans.includes("year")) showScreen("screen3");
+    else document.getElementById("hint").innerHTML="Hint: Happy ____ Year";
+}
+
+// ---------------- NAME & CELEBRATION ----------------
+function startCelebration(){
+    let name=document.getElementById("username").value.trim();
+    if(name==="") return;
+    document.getElementById("yourName").innerHTML="To: "+name;
+    showScreen("screen4");
+    launchFireworks();
+    startTypingWishes();
+}
+
+// ---------------- WISHES ----------------
+let wishes="As the final second of the year fades into stardust, may 2026 rise before you like a golden sunrise—warm, bright, and filled with promise. May every step you take echo with courage, every decision lead you closer to your dreams, and every moment unfold like a beautiful story written just for you. May happiness wrap around you like soft light, may success follow you like a loyal companion, and may peace fill the silent corners of your heart. Wishing you a radiant, powerful, unforgettable New Year 2026. Wishing you a joyful, successful and magical New Year 2026! 🎉✨";
+
+let index=0;
+function startTypingWishes(){
+    let seeBtn=document.getElementById("seeGiftBtn");
+    seeBtn.style.display="none";
+    document.getElementById("typing").innerHTML="";
+    function typeNext(){
+        if(index<wishes.length){
+            document.getElementById("typing").innerHTML+=wishes[index++];
+            setTimeout(typeNext,60); // slowed down fireworks speed
+        } else {
+            seeBtn.style.display="block";
+        }
+    }
+    typeNext();
+}
+
+
+// ---------------- GIFT & FINAL ----------------
+function showGift(){ showScreen("giftScreen"); }
+function showTeddy(){ showScreen("finalScreen"); launchFireworks(); }
+
+// ---------------- FIREWORKS ----------------
+const canvas = document.getElementById("fireworksCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let particles=[];
+
+class Particle{
+    constructor(x,y,color){
+        this.x=x; this.y=y;
+        this.size=Math.random()*3+1;
+        this.speedX=Math.random()*6-3;
+        this.speedY=Math.random()*6-3;
+        this.color=color;
+        this.life=100;
+    }
+    update(){ this.x+=this.speedX; this.y+=this.speedY; this.life--; }
+    draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+}
+
+function launchFireworks(){
+    setInterval(()=>{
+        let x=Math.random()*canvas.width;
+        let y=Math.random()*canvas.height*0.5;
+        let colors=["red","yellow","blue","purple","gold","white"];
+        let color=colors[Math.floor(Math.random()*colors.length)];
+        for(let i=0;i<80;i++){ particles.push(new Particle(x,y,color)); }
+    },600);
+    animate();
+}
+
+function animate(){
+    ctx.fillStyle="rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,index)=>{
+        p.update(); p.draw();
+        if(p.life<=0) particles.splice(index,1);
+    });
+    requestAnimationFrame(animate);
+}
+</script>
+</body>
+</html>
